@@ -1,0 +1,30 @@
+Attribute VB_Name = "DeleteAllSideColumns"
+Sub DeleteAllSideColumnsAccurately()
+    Dim shp As Shape
+    Dim pageRange As Range
+    Dim totalPages As Long
+    Dim currentPage As Long
+    Dim shapesToDelete As Collection
+   
+    totalPages = ActiveDocument.ComputeStatistics(wdStatisticPages)
+   
+    For currentPage = 1 To totalPages
+        
+        Set pageRange = ActiveDocument.Range
+        pageRange.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=currentPage
+        pageRange.End = pageRange.Paragraphs.Last.Range.End
+        
+        Set shapesToDelete = New Collection
+        For Each shp In ActiveDocument.Shapes
+            If shp.Anchor.Start >= pageRange.Start And shp.Anchor.Start < pageRange.End And shp.Type = msoTextBox Then
+                shapesToDelete.Add shp
+            End If
+        Next shp
+
+        For Each shp In shapesToDelete
+            shp.Delete
+        Next shp
+    Next currentPage
+
+    MsgBox "All side columns have been deleted from every page!"
+End Sub
